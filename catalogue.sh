@@ -42,15 +42,21 @@ VALIDATE $? "Enabling nodejs:20"
 dnf install nodejs -y &>>$LOG_FILE
 VALIDATE $? "Installing nodejs"
 
-useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
-VALIDATE $? "craeting robosop system user" 
+if [ $? -ne 0 ]
+then
+    useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
+    VALIDATE $? "creating roboshop system user"
+else
+    echo -e "System user roboshop already created ...$Y SKIPPING $N"
+fi
 
-mkdir /app
+mkdir -p /app
 VALIDATE $? "Creating app directory"
 
 curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip &>>$LOG_FILE
 VALIDATE $? "Downloading catalogue"
 
+rm -rf /app/*
 cd /app 
 unzip /tmp/catalogue.zip &>>$LOG_FILE
 VALIDATE $? "Unzipping catalogue"
@@ -70,8 +76,14 @@ cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo &>>$LOG_FILE
 dnf install mongodb-mongosh -y
 VALIDATE $? "Installing mongdb client"
 
-mongosh --host mongodb.kimidi.site </app/db/master-data.js &>>$LOG_FILE
-VALIDATE $? "Loading data into mongodb"
+STATUS=$(mongosh --host mongodb.kimidi.site --eval 'db.getMongo().getDBnames().indexof("catalogue")')
+if [ STATUS -lt 0 ]
+then 
+     mongosh --host mongodb.kimidi.site </app/db/master-data.js &>>$LOG_FILE 
+     VALIDATE $? "Loading data into mongodb"
+else
+    echo -e "Data is already loaded ...$Y SKIPPING $N"
+fi
 
 
 

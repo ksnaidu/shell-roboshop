@@ -46,7 +46,7 @@ VALIDATE $? "Installing nodejs:20"
 id roboshop
 if [ $? -ne 0 ]
 then
-    cartadd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>$LOG_FILE
+    useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>$LOG_FILE
     VALIDATE $? "Creating roboshop system user"
 else
     echo -e "System cart roboshop already created ... $Y SKIPPING $N"

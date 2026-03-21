@@ -57,7 +57,7 @@ cd /app
 unzip /tmp/dispatch.zip &>>$LOG_FILE
 VALIDATE $? "unzipping dispatch"
 
-if [ ! -f go.mod]; then
+if [ ! -f go.mod ] ; then
    go mod init dispatch &>>$LOG_FILE
    VALIDATE $? "initilizing go module"
 fi
